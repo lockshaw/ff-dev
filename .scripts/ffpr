@@ -1,0 +1,21 @@
+#! /usr/bin/env bash
+
+set -euo pipefail
+
+DIR="$(realpath -- "$(dirname "${BASH_SOURCE[0]}")")"
+
+if [[ ! $# -eq 1 ]]; then 
+  >2 echo "Usage: $0 <pr-number>"
+  exit 1
+fi
+
+ffpr() {
+  if [[ ! -e $DIR/../pr/$1 ]]; then 
+    cd "$DIR/../master"
+    gh worktree pr "$1" ../pr/"$1"
+  fi 
+}
+
+mkdir -p "$DIR/../pr"
+ffpr "$@"
+echo cd "$DIR/../pr/$1"

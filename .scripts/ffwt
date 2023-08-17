@@ -1,0 +1,25 @@
+#! /usr/bin/env bash
+
+set -euo pipefail
+
+DIR="$(realpath -- "$(dirname "${BASH_SOURCE[0]}")")"
+
+if [[ ! $# -eq 1 ]]; then 
+  >2 echo "Usage: $0 <branch-name>"
+  exit 1
+fi
+
+ffwt() {
+  if [[ ! -e $DIR/../pr/$1 ]]; then 
+    cd "$DIR/../master"
+    BRANCH_NAME="${1#*/}"
+    echo "$BRANCH_NAME"
+    REMOTE="${1%%/*}"
+    echo "$REMOTE"
+    if [[ ! $REMOTE ]]; echo 
+  fi 
+}
+
+# mkdir -p "$DIR/../pr"
+ffwt "$@"
+# echo cd "$DIR/../pr/$1"
