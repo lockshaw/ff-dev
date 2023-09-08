@@ -1,0 +1,39 @@
+#! /usr/bin/env bash
+
+set -euo pipefail
+
+DIR="$(realpath -- "$(dirname "${BASH_SOURCE[0]}")")"
+
+info() {
+  >&2 echo "$@"
+}
+
+error() {
+  info "$@"
+  exit 1
+}
+
+if [[ ! $# -eq 2 ]]; then 
+  error "Usage: $0 <branch-name> <branch-from>"
+fi
+
+GH_DIR="$(dirname "$DIR")"
+cd "$GH_DIR/master"
+
+info "Fetching any new info..."
+git fetch origin
+info "Creating branch $1 off of $2..."
+git branch --no-track "$1" "$2"
+info "Setting upstream to $1..."
+mkdir -p "$(dirname "$GH_DIR/$1")"
+info "Creating worktree at $GH_DIR/$1..."
+git worktree add "$GH_DIR/$1" "$1"
+cd "$GH_DIR/$1"
+info "Fixing submodules..."
+ff-fix-submodules "$PWD"
+info "Creating config files..."
+ff-install "$PWD"
+info "Creating remote branch..."
+git push -u lockshaw "$1:$1"
+
+echo "cd '$GH_DIR/$1' && ls"

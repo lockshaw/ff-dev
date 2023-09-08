@@ -5,7 +5,7 @@ set -euo pipefail
 DIR="$(realpath -- "$(dirname "${BASH_SOURCE[0]}")")"
 
 if [[ ! $# -eq 1 ]]; then 
-  >2 echo "Usage: $0 <branch-name>"
+  >&2 echo "Usage: $0 <branch-name>"
   exit 1
 fi
 
@@ -16,7 +16,6 @@ ffwt() {
     echo "$BRANCH_NAME"
     REMOTE="${1%%/*}"
     echo "$REMOTE"
-    if [[ ! $REMOTE ]]; echo 
   fi 
 }
 

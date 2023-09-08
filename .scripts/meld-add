@@ -1,0 +1,8 @@
+#! /usr/bin/env bash
+
+GITROOT="$(git -C "$PWD" rev-parse --show-toplevel)"
+cd "$GITROOT"
+mkdir -p .lockshaw
+mv deps .lockshaw/deps
+git meld-index
+mv .lockshaw/deps deps

@@ -1,0 +1,65 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index a183adef4..d5cc007a2 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -168,18 +168,18 @@ if (NOT INTERNAL_BUILD_MARCH AND NOT DEFINED BUILD_MARCH)
+ endif()
+ 
+ # Add flags for Power architectures
+-check_cxx_compiler_flag("-maltivec -Werror" COMPILER_SUPPORTS_MALTIVEC)
+-if(COMPILER_SUPPORTS_MALTIVEC)
+-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -maltivec")
+-endif()
+-check_cxx_compiler_flag("-mabi=altivec -Werror" COMPILER_SUPPORTS_MABI_ALTIVEC)
+-if(COMPILER_SUPPORTS_MABI_ALTIVEC)
+-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mabi=altivec")
+-endif()
+-check_cxx_compiler_flag("-mvsx -Werror" COMPILER_SUPPORTS_MVSX)
+-if(COMPILER_SUPPORTS_MVSX)
+-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mvsx")
+-endif()
++# check_cxx_compiler_flag("-maltivec -Werror" COMPILER_SUPPORTS_MALTIVEC)
++# if(COMPILER_SUPPORTS_MALTIVEC)
++#   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -maltivec")
++# endif()
++# check_cxx_compiler_flag("-mabi=altivec -Werror" COMPILER_SUPPORTS_MABI_ALTIVEC)
++# if(COMPILER_SUPPORTS_MABI_ALTIVEC)
++#   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mabi=altivec")
++# endif()
++# check_cxx_compiler_flag("-mvsx -Werror" COMPILER_SUPPORTS_MVSX)
++# if(COMPILER_SUPPORTS_MVSX)
++#   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mvsx")
++# endif()
+ 
+ # detect use of the cxx_defcheck wrapper and enable build checks
+ check_cxx_compiler_flag("--defcheck __test__" COMPILER_SUPPORTS_DEFCHECK)
+diff --git a/cmake/FindCUDA.cmake b/cmake/FindCUDA.cmake
+index 0bc5b195d..11fa1b4d9 100644
+--- a/cmake/FindCUDA.cmake
++++ b/cmake/FindCUDA.cmake
+@@ -16,8 +16,8 @@
+ 
+ # Replace CMake's FindCUDA with a newer upstream version that supports
+ # generator expressions
+-if(CMAKE_VERSION VERSION_LESS "3.6")
+-  include(${CMAKE_CURRENT_LIST_DIR}/newcmake/FindCUDA.cmake)
+-else()
+-  include(${CMAKE_ROOT}/Modules/FindCUDA.cmake)
+-endif()
++#if(CMAKE_VERSION VERSION_LESS "3.6")
++include(${CMAKE_CURRENT_LIST_DIR}/newcmake/FindCUDA.cmake)
++  #else()
++  #include(${CMAKE_ROOT}/Modules/FindCUDA.cmake)
++  #endif()
+diff --git a/cmake/newcmake/FindCUDA.cmake b/cmake/newcmake/FindCUDA.cmake
+index 771de54b4..99b0bc936 100644
+--- a/cmake/newcmake/FindCUDA.cmake
++++ b/cmake/newcmake/FindCUDA.cmake
+@@ -716,6 +716,7 @@ macro(cuda_find_library_local_first_with_path_ext _var _names _doc _path_ext )
+   # Search default search paths, after we search our own set of paths.
+   find_library(${_var}
+     NAMES ${_names}
++    PATH_SUFFIXES "stubs" "lib/stubs"
+     PATHS "/usr/lib/nvidia-current"
+     DOC ${_doc}
+     )

@@ -1,0 +1,26 @@
+#! /usr/bin/env bash
+
+set -euo pipefail
+
+DIR="$(realpath -- "$(dirname "${BASH_SOURCE[0]}")")"
+
+info() {
+  >&2 echo "$@"
+}
+
+error() {
+  info "$@"
+  exit 1
+}
+
+if [[ ! $# -eq 1 ]]; then 
+  error "Usage: $0 <pr-directory>"
+fi
+
+PRDIR="$(git -C "$1" rev-parse --show-toplevel)"
+
+info "Updating submodules for directory $PRDIR..."
+git -C "$PRDIR" submodule update --init --recursive
+git -C "$PRDIR/deps/legion" apply "$DIR/lockshaw-legion.patch"
+git -C "$PRDIR/deps/nccl" apply "$DIR/lockshaw-nccl.patch"
+info "Finished updating submodules"

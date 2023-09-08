@@ -1,0 +1,38 @@
+#! /usr/bin/env bash
+
+set -euo pipefail
+
+DIR="$(realpath -- "$(dirname "${BASH_SOURCE[0]}")")"
+ROOT="$(dirname "$DIR")"
+
+if [[ ! $# -eq 1 ]]; then 
+  >&2 echo "Usage: $0 <branch-dir>"
+  exit 1
+fi
+
+if [[ ! -f "$ROOT/$1/.git" ]]; then 
+  >&2 echo "Error: $ROOT/$1/.git does not contain a .git file"
+  exit 1
+fi
+
+if [[ -e "$ROOT/$1/.envrc" || -e "$ROOT/$1/.vimrc" ]]; then 
+  >&2 echo "Error: $1 already contains a .envrc or .vimrc"
+  exit 1
+fi
+
+cat >"$ROOT/$1/.envrc" <<'EOF'
+source_up
+export MYDIR="$PWD"
+use vim .vimrc
+EOF
+
+cat >"$ROOT/$1/.vimrc" << 'EOF'
+" example search path configuration
+set path=lib/runtime/**,lib/**
+
+" set build target
+" let g:target = "pcg"
+
+" set test target
+" let g:test_target = "utils-test"
+EOF
