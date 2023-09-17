@@ -49,7 +49,7 @@ def config_for_library(base_path: Path):
         },
         f'{base_path}/src/*.h': {
             'alternate': [f'{base_path}/src/{{}}.cc', f'{base_path}/src/{{}}.test.cc'],
-            'type': 'h',
+            'type': 'p',
         }
     }
 

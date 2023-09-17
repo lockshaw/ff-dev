@@ -33,13 +33,19 @@
         inherit system;
         config.allowUnfree = true;
       };
+
+      libclangPythonBindings = pkgs.python3Packages.callPackage ./pkgs/libclang.nix { };
     in 
       {
+        packages = {
+          libclangPythonBindings = libclangPythonBindings;
+        };
+
         devShell = pkgs.mkShell {
-          buildInputs = with pkgs; [
+          buildInputs = (with pkgs; [
             cmakeCurses
-            llvmPackages_13.clang
-            llvmPackages_13.stdenv
+            llvmPackages.clang
+            llvmPackages.stdenv
             ccache
             cudatoolkit
             cudaPackages.cuda_nvcc
@@ -55,7 +61,15 @@
             python3
             gh-markdown-preview
             plantuml
-          ];
+            libclang
+            self.packages.${system}.libclangPythonBindings
+          ]) ++ (with pkgs.python3Packages; [
+            ipython
+            mypy
+            python-lsp-server
+            pylsp-mypy
+            python-lsp-ruff
+          ]);
         };
       }
   );

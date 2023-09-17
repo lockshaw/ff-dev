@@ -8,6 +8,11 @@ import snippet_helpers as h
 importlib.reload(h)
 endglobal
 
+snippet ifndef "flexflow ifndef" bA
+#ifndef `!p snip.rv = h.gen_ifndef_uid(path)`
+#define `!p snip.rv = h.gen_ifndef_uid(path)`
+endsnippet
+
 snippet hdr "flexflow header gen" bA
 #ifndef `!p snip.rv = h.gen_ifndef_uid(path)`
 #define `!p snip.rv = h.gen_ifndef_uid(path)`
@@ -29,7 +34,9 @@ snippet test "flexflow test gen" bA
 #include "utils/testing.h"
 #include "`!p snip.rv = h.get_include_path(path)`"
 
-TEST_CASE("$0") {
+TEST_SUITE(FF_TEST_SUITE) {
+	TEST_CASE("$0") {
+	}
 }
 endsnippet
 

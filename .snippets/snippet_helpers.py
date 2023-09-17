@@ -24,9 +24,11 @@ def get_include_path(p: Path):
     p = Path(p).absolute()
     lib_root = get_lib_root(p)
     relpath = p.relative_to(lib_root / 'src')
-    public_include = lib_root / 'include' / with_suffixes(relpath, '.h')
-    private_include = lib_root / 'src' / with_suffixes(relpath, '.h')
+    include_dir = lib_root / 'include'
+    src_dir = lib_root / 'src'
+    public_include = include_dir / with_suffixes(relpath, '.h')
+    private_include = src_dir / with_suffixes(relpath, '.h')
     if public_include.exists():
-        return str(public_include.relative_to(lib_root))
+        return str(public_include.relative_to(include_dir))
     if private_include.exists():
-        return str(private_include.relative_to(lib_root))
+        return str(private_include.relative_to(src_dir))

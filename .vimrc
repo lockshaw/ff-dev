@@ -72,7 +72,7 @@ function! Build()
   call FixTerm()
   exec '1T pushd '..g:buildpath..'
       \ && clear 
-      \ && CCACHE_BASEDIR=/home/lockshaw/hax/dev/ff make '..g:target..' 2>&1; 
+      \ && CCACHE_BASEDIR=/home/lockshaw/hax/dev/ff make '..join(g:target, ' ')..' 2>&1; 
       \ popd > /dev/null
       \ '
 endfunction 
@@ -81,11 +81,29 @@ function! Test()
   call FixTerm()
   exec '1T pushd '..g:buildpath..'
       \ && clear 
-      \ && CCACHE_BASEDIR=/home/lockshaw/hax/dev/ff make '..g:test_target..' 2>&1
-      \ && ctest --progress --output-on-failure;
+      \ && CCACHE_BASEDIR=/home/lockshaw/hax/dev/ff make '..join(g:test_target, ' ')..' 2>&1
+      \ && ctest --progress --output-on-failure -L "^'..join(g:test_target, '|')..'$";
       \ popd > /dev/null
       \ '
 endfunction
+
+function! SetTargets(...) 
+  let g:target = a:000
+  let g:test_target = g:target
+endfunction
+
+function! AddTargets(...)
+  let g:target += a:000
+  let g:test_target += a:000
+endfunction
+
+function! ListTargets(A,L,P)
+  return system("cd "..g:buildpath.." && make help | tail -n +3 | cut -c 5- | grep '^[a-z]' | grep -v '^clean'")
+endfun
+
+command! -complete=custom,ListTargets -nargs=* SetTargets :call SetTargets(<f-args>)
+command! -complete=custom,ListTargets -nargs=* AddTargets :call AddTargets(<f-args>)
+command! ShowTargets :echom g:target
 
 function! Fix() 
   lua vim.lsp.buf.code_action()
