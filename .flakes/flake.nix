@@ -62,6 +62,7 @@
             gh-markdown-preview
             plantuml
             libclang
+            ruff
             self.packages.${system}.libclangPythonBindings
           ]) ++ (with pkgs.python3Packages; [
             ipython
@@ -69,6 +70,11 @@
             python-lsp-server
             pylsp-mypy
             python-lsp-ruff
+            pygithub
+            sqlitedict
+            frozendict
+            black
+            toml
           ]);
         };
       }
