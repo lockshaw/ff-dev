@@ -1,8 +1,12 @@
 #! /usr/bin/env bash
 
 set -euo pipefail
+set -x
 
 DIR="$(realpath -- "$(dirname "${BASH_SOURCE[0]}")")"
+GHDIR="$(realpath -- "$DIR/../")"
+
+cd "$GHDIR/master"
 
 info() {
   >&2 echo "$@"
@@ -13,34 +17,50 @@ error() {
   exit 1
 }
 
-WORKTREE_EXTENSION='despreston/gh-worktree'
-if ! (gh extension list 2>&1 | grep -q "$WORKTREE_EXTENSION"); then 
-  info "Could not find worktree extension to gh-cli. Installing..."
-  gh extension install "$WORKTREE_EXTENSION"
-fi
-
+#WORKTREE_EXTENSION='despreston/gh-worktree'
+#if ! (gh extension list 2>&1 | grep -q "$WORKTREE_EXTENSION"); then 
+#  info "Could not find worktree extension to gh-cli. Installing..."
+#  gh extension install "$WORKTREE_EXTENSION"
+#fi
 if [[ $# -lt 1 || $# -gt 2 ]]; then 
   error "Usage: $0 <pr-number> [pr-alias]"
 fi
+ISSUENUM="$1"
 
-ffpr() {
-  if [[ ! -e $DIR/../pr/$1 ]]; then 
-    cd "$DIR/../master"
-    gh worktree pr "$1" ../pr/"$1"
-  fi 
+JSON="$(gh pr view "$ISSUENUM" --json headRepositoryOwner,headRepository,headRefName)"
+
+OWNER_NAME="$(jq -r .headRepositoryOwner.login <<<"$JSON")"
+OWNER_REPO_NAME="$(jq -r .headRepository.name <<<"$JSON")"
+OWNER_BRANCH_NAME="$(jq -r .headRefName <<<"$JSON")"
+REPO_SLUG="$OWNER_NAME/$OWNER_REPO_NAME"
+
+# if [[ $OWNER_NAME == "flexflow" ]]; then
+#   OWNER_NAME="origin"
+# fi
+
+if ! git remote get-url "$OWNER_NAME"; then 
+  SSH_URL="$(gh repo view "$REPO_SLUG" --json sshUrl | jq -r .sshUrl)"
+  git remote add "$OWNER_NAME" "$SSH_URL"
+fi
+
+git fetch "$OWNER_NAME"
+
+_ffpr() {
+  git worktree add --track -b "$ALIAS" "$PRDIR" "$OWNER_NAME/$OWNER_BRANCH_NAME"
 }
 
-PRDIR="$(realpath -- "$DIR/../pr/$1")"
-mkdir -p "$DIR/../pr"
+ALIAS="$2"
+
+PRDIR="$GHDIR/pr/$ISSUENUM"
+mkdir -p "$GHDIR/pr"
 if [[ ! -e "$PRDIR" ]]; then 
-  if [[ $# -gt 2 && ! -e "$DIR/../$2" ]]; then 
-    error "Alias $2 already exists"
+  if [[ $# -gt 2 && ! -e "$GHDIR/$ALIAS" ]]; then 
+    error "Alias $ALIAS already exists"
   fi
-  ffpr "$@"
-  ff-install "pr/$1" 
-  ln -s "$PRDIR" "$DIR/../$2"
+  _ffpr
+  ln -s "$PRDIR" "$GHDIR/$ALIAS"
 else 
-  ffpr "$@"
+  _ffpr
 fi
 for DEP in "$PRDIR/deps"/*; do 
   if [[ $(ls -1 "$DEP" | wc -l) -eq 0 ]]; then 
@@ -48,4 +68,7 @@ for DEP in "$PRDIR/deps"/*; do
     break
   fi
 done
-echo cd "$DIR/../pr/$1"
+ff-install "$GHDIR/pr/$ISSUENUM"
+echo cd "$GHDIR/pr/$ISSUENUM"
+
+# vim: set tabstop=2 shiftwidth=2 expandtab:

@@ -3,30 +3,27 @@
 set -euo pipefail
 
 DIR="$(realpath -- "$(dirname "${BASH_SOURCE[0]}")")"
-ROOT="$(dirname "$DIR")"
 
 if [[ ! $# -eq 1 ]]; then 
   >&2 echo "Usage: $0 <branch-dir>"
   exit 1
 fi
 
-if [[ ! -f "$ROOT/$1/.git" ]]; then 
-  >&2 echo "Error: $ROOT/$1/.git does not contain a .git file"
+PRDIR="$(git -C "$1" rev-parse --show-toplevel)"
+
+if [[ -e "$PRDIR/.envrc" || -e "$PRDIR/.vimrc" ]]; then 
+  >&2 echo "Error: $PRDIR already contains a .envrc or .vimrc"
   exit 1
 fi
 
-if [[ -e "$ROOT/$1/.envrc" || -e "$ROOT/$1/.vimrc" ]]; then 
-  >&2 echo "Error: $1 already contains a .envrc or .vimrc"
-  exit 1
-fi
-
-cat >"$ROOT/$1/.envrc" <<'EOF'
+cat >"$PRDIR/.envrc" <<'EOF'
 source_up
 export MYDIR="$PWD"
 use vim .vimrc
+PATH_add "$PWD/tools"
 EOF
 
-cat >"$ROOT/$1/.vimrc" << 'EOF'
+cat >"$PRDIR/.vimrc" << 'EOF'
 " example search path configuration
 set path=lib/runtime/**,lib/**
 
