@@ -1,0 +1,3 @@
+[submodule ".modules/proj"]
+	path = .modules/proj
+	url = git@github.com:lockshaw/proj.git

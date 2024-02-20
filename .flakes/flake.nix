@@ -34,15 +34,18 @@
         config.allowUnfree = true;
       };
 
-      libclangPythonBindings = pkgs.python3Packages.callPackage ./pkgs/libclang.nix { };
+      # libclangPythonBindings = pkgs.python3Packages.callPackage ./pkgs/libclang.nix { };
     in 
       {
-        packages = {
-          libclangPythonBindings = libclangPythonBindings;
-        };
+        # packages = {
+        #   libclangPythonBindings = libclangPythonBindings;
+        # };
 
-        devShell = pkgs.mkShell {
+        devShell = pkgs.mkShell.override {
+          stdenv = pkgs.llvmPackages.libcxxStdenv;
+        } {
           buildInputs = (with pkgs; [
+            clang-tools
             cmakeCurses
             llvmPackages.clang
             llvmPackages.stdenv
@@ -63,7 +66,7 @@
             plantuml
             libclang
             ruff
-            self.packages.${system}.libclangPythonBindings
+            # self.packages.${system}.libclangPythonBindings
           ]) ++ (with pkgs.python3Packages; [
             ipython
             mypy

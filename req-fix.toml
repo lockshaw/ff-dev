@@ -1,0 +1,49 @@
+project_name = "flexflow"
+cmake_require_shell = true
+testsuite_macro = "FF_TEST_SUITE"
+namespace_name = "FlexFlow"
+header_extension = ".h"
+
+test_targets = [
+  # "utils-algorithms-tests", 
+  # "utils-backports-tests",
+  "utils-bidict-tests", # done
+  # "utils-compile_time_sequence-tests",
+  # "utils-deduplicated_priority_queue-tests",
+  # "utils-disjoint_set-tests",
+  # "utils-dot_format-tests",
+  "utils-ff_exceptions-tests",
+  # "utils-ffi-tests",
+  # "utils-ffi_helper-tests",
+  "utils-fmt_extra-tests",
+  # "utils-fp16-tests",
+  # "utils-graph-tests",
+  "utils-hash_extra-tests", # done
+  # "utils-json_extra-tests",
+  # "utils-optional_extra-tests",
+  # "utils-overload-tests",
+  # "utils-preprocessor_extra-tests",
+  # "utils-random_extra-tests",
+  # "utils-rapidcheck_extra-tests",
+  # "utils-smart_ptrs-tests",
+  # "utils-src-tests",
+  # "utils-stack_containers-tests",
+  "utils-string_extra-tests",
+  # "utils-strong_typedef-tests",
+  # "utils-test-tests",
+  # "utils-test_types-tests",
+  # "utils-testing-tests",
+  # "utils-tuple_extra-tests",
+  # "utils-type_index_extra-tests",
+  # "utils-type_list-tests",
+  "utils-type_traits_extra-tests",
+  # "utils-variant_extra-tests",
+  # "utils-visitable-tests",
+]
+
+[cmake_flags_extra]
+FF_CUDA_ARCH = "60"
+CUDA_PATH = "$(dirname $(which nvcc))/../"
+CMAKE_CUDA_ARCHITECTURES = "60"
+CMAKE_CUDA_COMPILER = "clang++" 
+CMAKE_CUDA_HOST_COMPILER = "clang++"

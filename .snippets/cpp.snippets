@@ -35,7 +35,8 @@ snippet test "flexflow test gen" bA
 #include "`!p snip.rv = h.get_include_path(path)`"
 
 TEST_SUITE(FF_TEST_SUITE) {
-	TEST_CASE("$0") {
+	TEST_CASE("${1}") {
+    CHECK_MESSAGE(false, "TODO: $1");
 	}
 }
 endsnippet
