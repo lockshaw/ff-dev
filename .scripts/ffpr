@@ -6,6 +6,13 @@ set -x
 DIR="$(realpath -- "$(dirname "${BASH_SOURCE[0]}")")"
 GHDIR="$(realpath -- "$DIR/../")"
 
+if ! gh auth token; then 
+  gh auth login
+fi
+
+if [[ ! -e "$GHDIR/master" ]]; then 
+  git clone --recursive "git@github.com:flexflow/FlexFlow.git" "$GHDIR/master"
+fi
 cd "$GHDIR/master"
 
 info() {

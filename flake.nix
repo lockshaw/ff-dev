@@ -1,25 +1,18 @@
-# Resources
-# ---
-# https://github.com/NixOS/templates/blob/2d6dcce2f3898090c8eda16a16abdff8a80e8ebf/c-hello/flake.nix
-#
-# According to https://nixos.wiki/wiki/CUDA, it is recommended to enable the cuda-maintainers cachix instance, i.e., 
-# add 
-# ```
-# nix.settings = {
-#   substituters = [
-#     "https://cuda-maintainers.cachix.org/"
-#   ];
-#   trusted-public-keys = [
-#     "cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E="
-#   ];
-# };
-# ```
-# to /etc/nixos/configuration.nix.
-
 {
   description = "A framework for automatic performance optimization of DNN training and inference";
 
-  nixConfig.bash-prompt-prefix = "(ff) ";
+  nixConfig = {
+    bash-prompt-prefix = "(ff) ";
+    extra-substituters = [
+      "https://ff.cachix.org"
+      "https://cuda-maintainers.cachix.org/"
+    ];
+    extra-trusted-public-keys = [
+      "cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E="
+      "ff.cachix.org-1:/kyZ0w35ToSJBjpiNfPLrL3zTjuPkUiqf2WH0GIShXM="
+    ];
+  };
+
 
   # Nixpkgs / NixOS version to use.
   inputs = {
@@ -40,10 +33,12 @@
         # packages = {
         #   libclangPythonBindings = libclangPythonBindings;
         # };
-
         devShell = pkgs.mkShell.override {
           stdenv = pkgs.llvmPackages.libcxxStdenv;
         } {
+          shellHook = ''
+            export LOLPATH="${toString ./.}/.scripts:$PATH"
+          '';
           buildInputs = (with pkgs; [
             clang-tools
             cmakeCurses
@@ -66,6 +61,9 @@
             plantuml
             libclang
             ruff
+            gh
+            jq
+            compdb
             # self.packages.${system}.libclangPythonBindings
           ]) ++ (with pkgs.python3Packages; [
             ipython
@@ -83,3 +81,4 @@
       }
   );
 }
+# vim: set tabstop=2 shiftwidth=2 expandtab:
