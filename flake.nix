@@ -37,7 +37,7 @@
           stdenv = pkgs.llvmPackages.libcxxStdenv;
         } {
           shellHook = ''
-            export LOLPATH="${toString ./.}/.scripts:$PATH"
+            export PATH="$HOME/ff/.scripts/:$HOME/ff/.modules/proj/bin/:$PATH"
           '';
           buildInputs = (with pkgs; [
             clang-tools
