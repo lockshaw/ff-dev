@@ -1,39 +1,140 @@
-#! /usr/bin/env bash
+#! /usr/bin/env python3
 
-set -euo pipefail
+import sys
+import os
+from pathlib import Path
+import json
+import subprocess
+from dataclasses import dataclass
+import shlex
+from git import Repo
+from typing import (
+    Set, 
+    Optional,
+)
 
-DIR="$(realpath -- "$(dirname "${BASH_SOURCE[0]}")")"
+DIR = Path(__file__).absolute().parent
+GH_ROOT = DIR.parent
+MASTER = GH_ROOT / 'master'
 
-info() {
-  >&2 echo "$@"
-}
+def get_repo() -> Repo:
+    result = Repo(MASTER)
+    assert not result.bare
+    return result
 
-error() {
-  info "$@"
-  exit 1
-}
+def get_branches() -> Set[str]:
+    return set(head.name for head in get_repo().heads)
 
-if [[ ! $# -eq 2 ]]; then 
-  error "Usage: $0 <branch-name> <branch-from>"
-fi
+def info(*args) -> None:
+    print(*args, file=sys.stderr)
 
-GH_DIR="$(dirname "$DIR")"
-cd "$GH_DIR/master"
+def fail_with_error(*args) -> None:
+    print('ERROR:', *args, file=sys.stderr)
+    sys.exit(1)
 
-info "Fetching any new info..."
-git fetch origin
-info "Creating branch $1 off of $2..."
-git branch --no-track "$1" "$2"
-info "Setting upstream to $1..."
-mkdir -p "$(dirname "$GH_DIR/$1")"
-info "Creating worktree at $GH_DIR/$1..."
-git worktree add "$GH_DIR/$1" "$1"
-cd "$GH_DIR/$1"
-info "Fixing submodules..."
-ff-fix-submodules "$PWD"
-info "Creating config files..."
-ff-install "$PWD"
-info "Creating remote branch..."
-git push -u lockshaw "$1:$1"
+def get_github_id_from_gh_cli() -> Optional[str]:
+    try:
+        output = subprocess.check_output(['gh', 'api', 'user'])
+        loaded = json.loads(output)
+        return loaded['login']
+    except json.JSONDecodeError:
+        info('Failed to get github id from gh cli')
+        return None
 
-echo "cd '$GH_DIR/$1' && ls"
+def get_github_id() -> Optional[str]:
+    return get_github_id_from_gh_cli()
+
+@dataclass(frozen=True)
+class Args:
+    branch_name: str
+    branch_from: str
+
+def git_fetch_all() -> None:
+    assert MASTER.is_dir()
+    subprocess.check_call(
+        ['git', 'fetch', '--all'],
+        cwd=MASTER,
+    )
+
+def git_make_branch(branch_name: str, branch_from: str) -> None:
+    assert MASTER.is_dir()
+    info(f'Creating branch {branch_name} off of origin/{branch_from}')
+    subprocess.check_call(
+        ['git', 'branch', '--no-track', branch_name, f'origin/{branch_from}'],
+        cwd=MASTER,
+    )
+
+def get_worktree_dir(branch_name: str) -> Path:
+    assert GH_ROOT.is_dir()
+    return GH_ROOT / branch_name
+
+def git_make_worktree(branch_name: str, worktree_dir: Path):
+    assert worktree_dir.parent.is_dir()
+    assert not worktree_dir.exists()
+    info(f"Creating worktree at {worktree_dir}...")
+    subprocess.check_call(
+        ['git', 'worktree', 'add', worktree_dir, branch_name],
+        cwd=MASTER,
+    )
+
+def fix_submodules(worktree_dir: Path):
+    assert worktree_dir.is_dir()
+    info("Fixing submodules...")
+    subprocess.check_call(
+        ['ff-fix-submodules', worktree_dir]
+    )
+
+def ff_install(worktree_dir: Path) -> None:
+    assert worktree_dir.is_dir()
+    info("Creating config files...")
+    subprocess.check_call(
+        ['ff-install', worktree_dir]
+    )
+
+def push_to_remote_branch(github_id: str, branch_name: str, worktree_dir: Path):
+    assert worktree_dir.is_dir()
+    info("Creating remote branch...")
+    subprocess.check_call(
+        ['git', 'push', '-u', github_id, f'{branch_name}:{branch_name}'],
+        cwd=worktree_dir,
+    )
+
+def main(args: Args) -> None:
+    github_id = get_github_id()
+    if github_id is None:
+        fail_with_error('Could not get github id')
+    git_fetch_all()
+    if args.branch_name in get_branches():
+        fail_with_error(f'Branch named {args.name} already exists')
+    worktree_dir = get_worktree_dir(args.branch_name)
+    assert worktree_dir.parent.is_dir()
+    assert not worktree_dir.exists()
+    git_make_branch(
+        branch_name=args.branch_name,
+        branch_from=args.branch_from,
+    )
+    git_make_worktree(
+        branch_name=args.branch_name,
+        worktree_dir=worktree_dir,
+    )
+    fix_submodules(worktree_dir)
+    ff_install(worktree_dir)
+    push_to_remote_branch(
+        github_id=github_id,
+        branch_name=args.branch_name,
+        worktree_dir=worktree_dir,
+    )
+    print(f'cd {shlex.quote(str(worktree_dir))} && ls')
+
+if __name__ == '__main__':
+    import argparse
+
+    p = argparse.ArgumentParser()
+    p.add_argument('branch_name', type=str)
+    p.add_argument('branch_from', type=str)
+    args = p.parse_args()
+
+    main(args=Args(
+      branch_name=args.branch_name,
+      branch_from=args.branch_from,
+    ))

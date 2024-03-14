@@ -1,6 +1,7 @@
 /result
 */
-!/.flakes
+!/.flake
+/.flake/result
 !/.vimrc
 !/.scripts
-!/.modules/*
+!/.modules/
