@@ -91,6 +91,20 @@ def ff_install(worktree_dir: Path) -> None:
         ['ff-install', worktree_dir]
     )
 
+def add_remote(worktree_dir: Path, github_id: str):
+    assert worktree_dir.is_dir()
+    info("Adding remote...")
+    try:
+        subprocess.check_output(
+            ['git', 'remote', 'get-url', github_id],
+            cwd=worktree_dir,
+        )
+    except subprocess.CalledProcessError:
+        subprocess.check_call(
+            ['git', 'remote', 'add', github_id, f'git@github.com:{github_id}/FlexFlow.git'],
+            cwd=worktree_dir,
+        )
+
 def push_to_remote_branch(github_id: str, branch_name: str, worktree_dir: Path):
     assert worktree_dir.is_dir()
     info("Creating remote branch...")
@@ -103,9 +117,10 @@ def main(args: Args) -> None:
     github_id = get_github_id()
     if github_id is None:
         fail_with_error('Could not get github id')
+        exit()
     git_fetch_all()
     if args.branch_name in get_branches():
-        fail_with_error(f'Branch named {args.name} already exists')
+        fail_with_error(f'Branch named {args.branch_name} already exists')
     worktree_dir = get_worktree_dir(args.branch_name)
     assert worktree_dir.parent.is_dir()
     assert not worktree_dir.exists()
