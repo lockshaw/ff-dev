@@ -134,6 +134,10 @@ def main(args: Args) -> None:
     )
     fix_submodules(worktree_dir)
     ff_install(worktree_dir)
+    add_remote(
+        worktree_dir=worktree_dir, 
+        github_id=github_id
+    )
     push_to_remote_branch(
         github_id=github_id,
         branch_name=args.branch_name,
