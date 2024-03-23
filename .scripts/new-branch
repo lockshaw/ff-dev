@@ -101,10 +101,6 @@ def add_remote(worktree_dir: Path, github_id: str):
         )
     except subprocess.CalledProcessError:
         subprocess.check_call(
-            ['git', 'remote', 'add', github_id, f'git@github.com:{github_id}/FlexFlow.git'],
-            cwd=worktree_dir,
-        )
-        subprocess.check_call(
             ['git', 'remote', 'add', '-f', github_id, f'git@github.com:{github_id}/FlexFlow.git'],
             cwd=worktree_dir,
         )
