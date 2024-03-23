@@ -58,9 +58,9 @@ def git_fetch_all() -> None:
 
 def git_make_branch(branch_name: str, branch_from: str) -> None:
     assert MASTER.is_dir()
-    info(f'Creating branch {branch_name} off of origin/{branch_from}')
+    info(f'Creating branch {branch_name} off of {branch_from}')
     subprocess.check_call(
-        ['git', 'branch', '--no-track', branch_name, f'origin/{branch_from}'],
+        ['git', 'branch', '--no-track', branch_name, f'{branch_from}'],
         cwd=MASTER,
     )
 
