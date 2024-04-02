@@ -11,7 +11,7 @@ if ! gh auth token; then
 fi
 
 if [[ ! -e "$GHDIR/master" ]]; then 
-  git clone --recursive "git@github.com:flexflow/FlexFlow.git" "$GHDIR/master"
+  git clone --recursive --branch master "git@github.com:flexflow/FlexFlow.git" "$GHDIR/master"
 fi
 cd "$GHDIR/master"
 
