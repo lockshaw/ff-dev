@@ -17,6 +17,7 @@
           export PATH="$HOME/ff/.scripts/:$PATH"
         '';
         buildInputs = (with pkgs; [
+          gh
           python3
         ]) ++ (with pkgs.python3Packages; [
           gitpython
