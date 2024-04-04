@@ -18,10 +18,9 @@ if [[ -e "$PRDIR/.envrc" || -e "$PRDIR/.vimrc" || -e "$PRDIR/.lockshaw.toml" ]];
 fi
 
 cat >"$PRDIR/.envrc" <<'EOF'
-source_up
-export MYDIR="$PWD"
-use vim .vimrc
-PATH_add "$PWD/tools"
+source_up_if_exists
+
+use flake
 EOF
 
 cat >"$PRDIR/.vimrc" << 'EOF'
@@ -34,5 +33,3 @@ set path=lib/runtime/**,lib/**
 " set test target
 " let g:test_target = "utils-test"
 EOF
-
-cp "$DIR/template-lockshaw.toml" "$PRDIR/.lockshaw.toml"
