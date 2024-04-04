@@ -19,6 +19,7 @@
         buildInputs = (with pkgs; [
           gh
           python3
+          jq
         ]) ++ (with pkgs.python3Packages; [
           gitpython
           pygithub
