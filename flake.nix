@@ -1,6 +1,6 @@
 {
   nixConfig = {
-    bash-prompt-prefix = "(ff) ";
+    bash-prompt-prefix = "(ff-dev) ";
   };
   
   inputs = {
