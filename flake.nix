@@ -1,4 +1,8 @@
 {
+  nixConfig = {
+    bash-prompt-prefix = "(ff-dev) ";
+  };
+  
   inputs = {
     nixpkgs.url = "nixpkgs/nixos-23.11";
     flake-utils.url = "github:numtide/flake-utils";
